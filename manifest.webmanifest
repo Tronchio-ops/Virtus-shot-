@@ -1,0 +1,14 @@
+{
+  "name": "Virtus Shot Tracker",
+  "short_name": "Virtus Shot",
+  "description": "App per tracciare percentuali tiro media distanza (5 posizioni) con storico e grafico.",
+  "start_url": "/virtus-shot-tracker/",
+  "scope": "/virtus-shot-tracker/",
+  "display": "standalone",
+  "background_color": "#062714",
+  "theme_color": "#062714",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
