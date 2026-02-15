@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#062714" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
+  <title>Virtus Shot Tracker</title>
+
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --bg:#062714;
+      --card:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.14);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+    }
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background: radial-gradient(circle at 50% 30%, rgba(18,120,64,.55), rgba(6,39,20,1) 55%);
+    }
+    .bg{
+      position:fixed; inset:0; z-index:-1;
+      background: url('bg.png') center/700px no-repeat;
+      opacity:.18;
+      filter:saturate(1.15) contrast(1.05);
+      pointer-events:none;
+    }
+    header{
+      max-width:980px; margin:0 auto; padding:18px 16px;
+      display:flex; gap:12px; align-items:center;
+    }
+    header img{width:44px;height:44px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .title{font-size:18px;font-weight:800}
+    .subtitle{font-size:13px;color:var(--muted)}
+    main{max-width:980px;margin:0 auto;padding:0 16px 40px;display:grid;gap:14px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 18px 45px rgba(0,0,0,.32);
+      backdrop-filter: blur(10px);
+    }
+    h2{margin:0 0 12px;font-size:16px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    label{font-size:12px;color:var(--muted)}
+    input{
+      border:1px solid var(--stroke);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+    }
+    input:focus{border-color:rgba(255,255,255,.22)}
+    .span2{grid-column:1/-1}
+    .tableWrap{overflow:auto;border-radius:14px;border:1px solid var(--stroke)}
+    table{width:100%;border-collapse:collapse;min-width:520px}
+    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;font-size:13px}
+    th{color:var(--muted);font-weight:700;background:rgba(0,0,0,.18)}
+    tfoot td{font-weight:800;background:rgba(0,0,0,.18)}
+    .actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      border:1px solid var(--stroke);
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    button.primary{background:rgba(255,255,255,.14)}
+    button.danger{background:rgba(255,90,90,.18);border-color:rgba(255,90,90,.35)}
+    button:active{transform:translateY(1px)}
+    .error{margin-top:10px;color:#ffd0d0;font-weight:800}
+    .chartWrap{
+      padding:10px;border:1px solid var(--stroke);
+      border-radius:14px;background:rgba(0,0,0,.18)
+    }
+    .small{color:var(--muted);font-size:13px;line-height:1.35}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
+  </style>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+
+<body>
+  <div class="bg"></div>
+
+  <header>
+    <img src="icon-192.png" alt="Virtus" />
+    <div>
+      <div class="title">Virtus Shot Tracker</div>
+      <div class="subtitle">Media distanza · 5 posizioni · storico + grafico</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Nuovo test</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="date">Data</label>
+          <input id="date" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="att">Tentativi per posizione</label>
+          <input id="att" type="number" min="1" max="50" value="20" />
+        </div>
+
+        <div class="field span2">
+          <label for="notes">Note (opzionale)</label>
+          <input id="notes" type="text" placeholder="es. gambe stanche, prima partitella..." />
+        </div>
+      </div>
+
+      <div class="tableWrap" style="margin-top:12px">
+        <table>
+          <thead>
+            <tr>
+              <th>Posizione</th>
+              <th>Segnati</th>
+              <th>Tentati</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+          <tfoot>
+            <tr>
+              <td><strong>Totale</strong></td>
+              <td id="totMade">0</td>
+              <td id="totAtt">0</td>
+              <td id="totPct">0%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button id="add" class="primary">Aggiungi sessione</button>
+        <button id="reset">Reset</button>
+      </div>
+
+      <div id="err" class="error"></div>
+    </section>
+
+    <section class="card">
+      <h2>Progressi</h2>
+
+      <div class="chartWrap">
+        <canvas id="chart" height="220"></canvas>
+      </div>
+
+      <div class="actions">
+        <button id="export">Esporta CSV</button>
+        <button id="backup">Backup JSON</button>
+        <label style="display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:rgba(0,0,0,.22);padding:10px 12px;border-radius:14px;font-weight:800;cursor:pointer;">
+          Importa JSON
+          <input id="import" type="file" accept="application/json" style="display:none" />
+        </label>
+        <button id="clear" class="danger">Svuota storico</button>
+      </div>
+
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Data</th>
+              <th>% Tot</th>
+              <th>Segnati</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="history"></tbody>
+        </table>
+      </div>
+
+      <p class="small" style="margin-top:10px">
+        Dati salvati in locale sul telefono (non serve account). Per condividere con la squadra usa CSV/Backup JSON.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js");
+    }
+  </script>
+</body>
+</html>
